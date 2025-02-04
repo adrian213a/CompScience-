@@ -1,0 +1,73 @@
+# Sample dataset: [Age, Income, Label]
+data = [
+    ['Young', 'Low', 'No'],
+    ['Young', 'Medium', 'No'],
+    ['Young', 'High', 'Yes'],
+    ['Middle', 'Low', 'No'],
+    ['Middle', 'Medium', 'Yes'],
+    ['Middle', 'High', 'Yes'],
+    ['Old', 'Low', 'Yes'],
+    ['Old', 'Medium', 'Yes'],
+    ['Old', 'High', 'Yes']
+]
+
+# Convert categorical data into frequency tables
+def calculate_probabilities(data):
+    class_counts = {}
+    feature_counts = {}
+
+    for row in data:
+        age, income, label = row
+        
+        # Count class occurrences
+        if label not in class_counts:
+            class_counts[label] = 0
+        class_counts[label] += 1
+        
+        # Count feature occurrences given a class
+        if label not in feature_counts:
+            feature_counts[label] = {'Age': {}, 'Income': {}}
+        
+        if age not in feature_counts[label]['Age']:
+            feature_counts[label]['Age'][age] = 0
+        feature_counts[label]['Age'][age] += 1
+        
+        if income not in feature_counts[label]['Income']:
+            feature_counts[label]['Income'][income] = 0
+        feature_counts[label]['Income'][income] += 1
+
+    return class_counts, feature_counts
+
+# Compute probability for a given test instance
+def predict(test_instance, class_counts, feature_counts, data_size):
+    max_prob = 0
+    best_class = None
+    
+    for label in class_counts:
+        # Compute prior probability P(C)
+        prior_prob = class_counts[label] / data_size
+        
+        # Compute likelihood P(X|C)
+        age, income = test_instance
+        age_prob = feature_counts[label]['Age'].get(age, 0) / class_counts[label]
+        income_prob = feature_counts[label]['Income'].get(income, 0) / class_counts[label]
+
+        # Apply Naïve Bayes formula: P(C|X) ∝ P(X|C) * P(C)
+        prob = age_prob * income_prob * prior_prob
+        
+        # Select the class with the highest probability
+        if prob > max_prob:
+            max_prob = prob
+            best_class = label
+    
+    return best_class
+
+# Compute class probabilities
+class_counts, feature_counts = calculate_probabilities(data)
+data_size = len(data)
+
+# Test a new instance: Age = Young, Income = Medium
+test_instance = ['Young', 'Medium']
+prediction = predict(test_instance, class_counts, feature_counts, data_size)
+
+print(f"Predicted Class for {test_instance}: {prediction}")
