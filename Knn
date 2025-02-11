@@ -1,0 +1,23 @@
+def knn_classify(training_data, labels, test_point, k):
+    distances = []
+    
+    # Calculate Euclidean distance between test point and all training points
+    for i, point in enumerate(training_data):
+        dist = euclidean_distance(test_point, point)
+        distances.append((dist, labels[i]))
+    
+    # Sort by distance and select the k nearest labels
+    distances.sort(key=lambda x: x[0])
+    nearest_labels = [label for _, label in distances[:k]]
+    
+    # Majority vote for classification
+    return max(set(nearest_labels), key=nearest_labels.count)
+
+# Example usage
+train_points = [[1, 2], [2, 3], [3, 3], [6, 6], [7, 8], [8, 9]]
+train_labels = ["A", "A", "A", "B", "B", "B"]
+test = [4, 4]
+k = 3
+
+prediction = knn_classify(train_points, train_labels, test, k)
+print("Predicted Class:", prediction)
